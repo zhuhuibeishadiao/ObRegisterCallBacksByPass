@@ -1,0 +1,94 @@
+typedef struct _OB_CALL_BACKS
+{
+	LIST_ENTRY EntryItemList //(callbacklist)
+	ULONG64 Operations
+	CALL_BACK_INFO* CallbackEntry //存储详细的数据 版本号 POB_OPERATION_REGISTRATION AltitudeString 注销时也使用这个  注意是指针
+	POBJCT_TYPE ObjectType
+	ULONG64 PreCallbackAddr
+	ULONG64 PostCallbackAddr
+}OB_CALL_BACKS, *POB_CALL_BACKS
+
+typedef struct _CALL_BACK_INFO
+{
+	ULONG64 Unknow
+	ULONG64 Unknow
+	ULONG64 Unknow
+	WCHAR* AltitudeString
+	LIST_ENTRY NextEntryItemList //(callbacklist) 跟上面开头的那个一样 存储下一个callbacklist
+	ULONG64 Operations
+	CALL_BACK_INFO* CallbackEntry //存储详细的数据 版本号 POB_OPERATION_REGISTRATION AltitudeString 也就是本身节点CALL_BACK_INFO 注销时也使用这个 注意是指针
+	POBJCT_TYPE ObjectType
+	ULONG64 PreCallbackAddr
+	ULONG64 PostCallbackAddr
+}CALL_BACK_INFO, *PCALL_BACK_INFO
+
+
+Win7 x64下得出
+
+windgb：
+nt!RtlpBreakWithStatusInstruction:
+fffff800`03ec8490 cc              int     3
+0: kd> dq PsProcessType
+fffff800`04101020  fffffa80`18d3f8d0 00000040`00026161
+fffff800`04101030  fffffa80`18d456f0 fffffa80`18c23fc0
+fffff800`04101040  a1993ffe`00000001 fffffa80`18dc8b40
+fffff800`04101050  fffffa80`18d45f30 00000001`00000000
+fffff800`04101060  00000000`0007ff7e 00000040`00000120
+fffff800`04101070  00000043`00000004 fffff683`ffffff78
+fffff800`04101080  00002710`00000007 00000000`0083ffff
+fffff800`04101090  fffff800`03e50380 00000000`00000007
+0: kd> dt _object_type fffffa80`18d3f8d0
+nt!_OBJECT_TYPE
+   +0x000 TypeList         : _LIST_ENTRY [ 0xfffffa80`18d3f8d0 - 0xfffffa80`18d3f8d0 ]
+   +0x010 Name             : _UNICODE_STRING "Process"
+   +0x020 DefaultObject    : (null) 
+   +0x028 Index            : 0x7 ''
+   +0x02c TotalNumberOfObjects : 0x32
+   +0x030 TotalNumberOfHandles : 0x126
+   +0x034 HighWaterNumberOfObjects : 0x32
+   +0x038 HighWaterNumberOfHandles : 0x127
+   +0x040 TypeInfo         : _OBJECT_TYPE_INITIALIZER
+   +0x0b0 TypeLock         : _EX_PUSH_LOCK
+   +0x0b8 Key              : 0x636f7250
+   +0x0c0 CallbackList     : _LIST_ENTRY [ 0xfffff8a0`00c77530 - 0xfffff8a0`023f1cf0 ]
+0: kd> dq 0xfffff8a0`00c77530
+fffff8a0`00c77530  fffff8a0`023f1cf0 fffffa80`18d3f990
+fffff8a0`00c77540  00000001`00000003 fffff8a0`00c77510
+fffff8a0`00c77550  fffffa80`18d3f8d0 fffff880`02df4000
+fffff8a0`00c77560  00000000`00000000 00000000`00000000
+fffff8a0`00c77570  fffff8a0`023f1d30 fffffa80`18d45ff0
+fffff8a0`00c77580  00000001`00000003 fffff8a0`00c77510
+fffff8a0`00c77590  fffffa80`18d45f30 fffff880`02df4000
+fffff8a0`00c775a0  00000000`00000000 00000000`00000000
+0: kd> dq fffff8a0`00c77510
+fffff8a0`00c77510  00000000`00020100 00000000`00000000
+fffff8a0`00c77520  00000000`000c000c fffff8a0`00c775b0
+fffff8a0`00c77530  fffff8a0`023f1cf0 fffffa80`18d3f990
+fffff8a0`00c77540  00000001`00000003 fffff8a0`00c77510
+fffff8a0`00c77550  fffffa80`18d3f8d0 fffff880`02df4000
+fffff8a0`00c77560  00000000`00000000 00000000`00000000
+fffff8a0`00c77570  fffff8a0`023f1d30 fffffa80`18d45ff0
+fffff8a0`00c77580  00000001`00000003 fffff8a0`00c77510
+0: kd> du fffff8a0`00c775b0
+fffff8a0`00c775b0  "380804"
+0: kd> dq 0xfffff8a0`023f1cf0
+fffff8a0`023f1cf0  fffffa80`18d3f990 fffff8a0`00c77530
+fffff8a0`023f1d00  00000001`00000003 fffff8a0`023f1cd0
+fffff8a0`023f1d10  fffffa80`18d3f8d0 fffff880`02df4170
+fffff8a0`023f1d20  00000000`00000000 00000000`00000000
+fffff8a0`023f1d30  fffffa80`18d45ff0 fffff8a0`00c77570
+fffff8a0`023f1d40  00000001`00000003 fffff8a0`023f1cd0
+fffff8a0`023f1d50  fffffa80`18d45f30 fffff880`02df4170
+fffff8a0`023f1d60  00000000`00000000 00000000`00000000
+0: kd> dq fffff8a0`023f1cd0
+fffff8a0`023f1cd0  00000000`00020100 00000000`00000000
+fffff8a0`023f1ce0  00000000`000c000c fffff8a0`023f1d70
+fffff8a0`023f1cf0  fffffa80`18d3f990 fffff8a0`00c77530
+fffff8a0`023f1d00  00000001`00000003 fffff8a0`023f1cd0
+fffff8a0`023f1d10  fffffa80`18d3f8d0 fffff880`02df4170
+fffff8a0`023f1d20  00000000`00000000 00000000`00000000
+fffff8a0`023f1d30  fffffa80`18d45ff0 fffff8a0`00c77570
+fffff8a0`023f1d40  00000001`00000003 fffff8a0`023f1cd0
+0: kd> du fffff8a0`023f1d70
+fffff8a0`023f1d70  "380795}NČ(敓摓FTWA.Č..樠Ƚ..0"
+0: kd> g
